@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/mustard-ui@latest/dist/css/mustard-ui.min.css"
+    />
+    <script src="https://unpkg.com/prop-types@15.6/prop-types.js"></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+    <title>Quotes</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const myNews = [
+        {
+          id: 1,
+          text: `"Be yourself..."`,
+          bigText: `"Be yourself, everyone else is already taken."`,
+          author: "- Oscar Wilde"
+        },
+        {
+          id: 2,
+          text: `"Two things are..."`,
+          bigText: `"Two things are infinite: the universe and human stupidity; and I'm not sure about the universe."`,
+          author: "- Albert Einstein"
+        },
+        {
+          id: 3,
+          text: `"Be the change..."`,
+          bigText: `"Be the change that you wish to see in the world."`,
+          author: "- Mahatma Gandhi"
+        },
+        {
+          id: 4,
+          text: `"Don’t walk in front of me…"`,
+          bigText: `"Don’t walk in front of me… I may not follow. Don’t walk behind me… I may not lead."`,
+          author: "- Albert Camus"
+        },
+        {
+          id: 5,
+          text: `"If you tell..."`,
+          bigText: `"If you tell the truth, you don't have to remember anything."`,
+          author: "- Mark Twain"
+        }
+      ];
+      //News Component ********************
+      class News extends React.Component {
+        state = {
+          counter: 0
+        };
+        renderNews = () => {
+          const { data } = this.props;
+          let newsTemplate = null;
+
+          if (data.length) {
+            newsTemplate = data.map(function(item) {
+              return <Article key={item.id} data={item} />;
+            });
+          } else {
+            newsTemplate = <p>No news, unfortunally </p>;
+          }
+          return newsTemplate;
+        };
+        render() {
+          const { data } = this.props;
+          const { counter } = this.state;
+          return (
+            <div className="news">
+              {this.renderNews()}
+              {data.length ? (
+                <strong className={"news__count"}>
+                  News total: {data.length}
+                </strong>
+              ) : null}
+            </div>
+          );
+        }
+      }
+      //News Component ********************
+      News.propTypes = {
+        data: PropTypes.array.isRequired
+      };
+      //Add Component ********************
+
+      class Add extends React.Component {
+        state = {
+          name: "",
+          text: "",
+          agree: false
+        };
+
+        // Обработчики
+        handleChange = e => {
+          const { id, value } = e.currentTarget;
+          this.setState({ [id]: e.currentTarget.value });
+        };
+        handleCheckBoxChange = e => {
+          this.setState({ agree: e.currentTarget.checked });
+        };
+        onBtnClickHandler = e => {
+          e.preventDefault();
+          const { name, text } = this.state;
+          this.props.onAddNews();
+        };
+        validate = () => {
+          const { name, text, agree } = this.state;
+          if (name.trim() && text.trim && agree) {
+            return true;
+          } else {
+            return false;
+          }
+        };
+
+        // Обработчики
+
+        render() {
+          const { name, text, agree } = this.state;
+          return (
+            <form className="add">
+              <input
+                id="name"
+                type="text"
+                onChange={this.handleChange}
+                className="add__author"
+                placeholder="your name"
+                value={name}
+              />
+              <textarea
+                id="text"
+                onChange={this.handleChange}
+                className="add_text"
+                placeholder="type here"
+                value={text}
+              ></textarea>
+              <label className="add_checkrule">
+                <input onChange={this.handleCheckBoxChange} type="checkbox" />I
+                agree with rules
+              </label>
+              <button
+                className="add__btn"
+                onClick={this.onBtnClickHandler}
+                disabled={!this.validate()}
+              >
+                Show alert
+              </button>
+            </form>
+          );
+        }
+      }
+      Add.propTypes = {
+        onAddNews: PropTypes.func.isRequired
+      };
+      //Add Component ********************
+
+      //Article Component ********************
+      class Article extends React.Component {
+        state = {
+          visible: false
+        };
+        handleReadMoreClick = e => {
+          e.preventDefault();
+          this.setState({ visible: true });
+        };
+        render() {
+          const { text, bigText, author } = this.props.data;
+          const { visible } = this.state;
+          return (
+            <div className="article">
+              <p className="news__text">{text}</p>
+              {!visible && (
+                <a
+                  onClick={this.handleReadMoreClick}
+                  href="#"
+                  className="news__readmore"
+                >
+                  Подробнее
+                </a>
+              )}
+              {visible && <p className="news__big-text">{bigText}</p>}
+
+              <p className="news__author">{author}</p>
+            </div>
+          );
+        }
+      }
+      //Article Component ********************
+      Article.propTypes = {
+        data: PropTypes.shape({
+          text: PropTypes.string.isRequired,
+          bigText: PropTypes.string.isRequired,
+          author: PropTypes.string.isRequired
+        })
+      };
+      //App Component ********************
+      class App extends React.Component {
+        state = {
+          news: myNews
+        };
+        handleAddNews = () => {
+          console.log("I summoned from Add, but have the access to App");
+        };
+        render() {
+          return (
+            <React.Fragment>
+              <h3>Add quote</h3>
+              <Add onAddNews={this.handleAddNews} />
+              <h3>Famous quotes:</h3>
+              <News data={myNews} />
+            </React.Fragment>
+          );
+        }
+      }
+      //App Component ********************
+
+      ReactDOM.render(<App />, document.getElementById("root"));
+    </script>
+  </body>
+</html>
